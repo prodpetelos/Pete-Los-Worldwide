@@ -6,8 +6,9 @@
 <title>Pete Los Beat Store - Windows 98</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
+  body { background: #000000; }
   :root {
-    --bg: #008080;
+    --bg: #000000;
     --face: #c0c0c0;
     --dark: #808080;
     --darker: #404040;
@@ -197,7 +198,7 @@
       <div class="tb-sep"></div>
       <button class="btnx" onclick="addSelToCart()">🛒 Add to Cart</button>
       <button class="btnx" onclick="showWin('win-cart')">View Cart (<span id="cart-count-small">0</span>)</button>
-      <div style="margin-left:auto;color:var(--dark);">1 beat available</div>
+      <div style="margin-left:auto;color:var(--dark);">0 beats available</div>
     </div>
     <div class="listview" style="height:210px;">
       <table>
@@ -288,7 +289,7 @@
         <tr><td style="color:var(--dark);">Version:</td><td>1.0.0 (Build 1998)</td></tr>
         <tr><td style="color:var(--dark);">Platform:</td><td>Windows 98 Second Edition</td></tr>
         <tr><td style="color:var(--dark);">Beats Available:</td><td>8</td></tr>
-        <tr><td style="color:var(--dark);">Contact:</td><td><a href="mailto:prodpetelos@gmail.com" style="color:var(--blue);">prodpetelos@gmail.com</a></td></tr>
+        <tr><td style="color:var(--dark);">Contact:</td><td><a href="/cdn-cgi/l/email-protection#afdfddc0cbdfcadbcac3c0dcefc8c2cec6c381ccc0c2" style="color:var(--blue);"><span class="__cf_email__" data-cfemail="d1a1a3beb5a1b4a5b4bdbea291b6bcb0b8bdffb2bebc">[email&#160;protected]</span></a></td></tr>
         <tr><td style="color:var(--dark);">Instagram:</td><td><a href="https://instagram.com/peteloshiskeys" target="_blank" style="color:var(--blue);">@peteloshiskeys</a></td></tr>
         <tr><td style="color:var(--dark);">YouTube:</td><td><a href="https://www.youtube.com/watch?v=8eqSBVoxg1c" target="_blank" style="color:var(--blue);">youtube.com/petelos</a></td></tr>
       </table>
@@ -414,6 +415,13 @@
   <button class="tb-btn" id="tbb-contact" onclick="focusWin('win-contact')">✉️ Contact</button>
   <div class="tb-clock" id="clock">12:00 PM</div>
 </div>
+
+<script>
+// ---- STATE ----
+const BEATS = []; // TODO: populate from Cloudflare bucket
+const LICS = {Basic:20, Premium:40};
+let selId=null, playId=null, playing=false, pTimer=null, prog=0, zTop=100;
+let cart=[];
 
 // ---- RENDER ----
 function renderBeats(){
@@ -566,7 +574,7 @@ function focusWin(id){
   zTop++;w.style.zIndex=zTop;
   document.querySelectorAll('.win .titlebar').forEach(tb=>tb.style.background=tb.closest('.win').id===id?'var(--blue)':'var(--dark)');
   document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
-  const map={' win-main':'tbb-main','win-cart':'tbb-cart','win-contact':'tbb-contact'};
+  const map={'win-main':'tbb-main','win-cart':'tbb-cart','win-contact':'tbb-contact'};
   if(map[id])document.getElementById(map[id])?.classList.add('active');
 }
 function showWin(id){document.getElementById(id)?.classList.remove('hidden');focusWin(id);}
@@ -618,9 +626,9 @@ tick();setInterval(tick,10000);
   });
 })();
 
-
-// Init
-renderBeats();selBeat(1);
+renderBeats();
+updateCart();
+tick();
 </script>
 </body>
 </html>
