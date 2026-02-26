@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pete Los Beat Store - Windows 98</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #008080;
+    --face: #c0c0c0;
+    --dark: #808080;
+    --darker: #404040;
+    --light: #ffffff;
+    --black: #000000;
+    --blue: #000080;
+    --accent: #0000aa;
+    --green: #00ff00;
+  }
+  /* --- WIN98 BORDER UTILS --- */
+  .raised{border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);}
+  .sunken{border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);}
+  .sunken-inner{border:1px solid;border-color:var(--dark) var(--face) var(--face) var(--dark);}
+
+  /* --- TASKBAR --- */
+  .taskbar{position:fixed;bottom:0;left:0;right:0;height:28px;background:var(--face);border-top:2px solid var(--light);display:flex;align-items:center;padding:2px 3px;gap:3px;z-index:500;}
+  .start-btn{display:flex;align-items:center;gap:3px;padding:1px 6px 1px 4px;font-weight:bold;font-size:11px;cursor:pointer;height:22px;background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);}
+  .start-btn:active{border-color:var(--darker) var(--light) var(--light) var(--darker);}
+  .win-logo{width:16px;height:16px;display:grid;grid-template-columns:1fr 1fr;gap:1px;}
+  .win-logo div:nth-child(1){background:#ff3333;}
+  .win-logo div:nth-child(2){background:#33bb33;}
+  .win-logo div:nth-child(3){background:#3333ff;}
+  .win-logo div:nth-child(4){background:#ffcc00;}
+  .tb-sep{width:2px;height:20px;border-left:1px solid var(--dark);border-right:1px solid var(--light);margin:0 1px;}
+  .tb-btn{height:22px;padding:1px 8px;font-size:11px;cursor:pointer;background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;}
+  .tb-btn.active{border-color:var(--darker) var(--light) var(--light) var(--darker);background:#b8b8b8;}
+  .tb-clock{margin-left:auto;padding:1px 6px;font-size:11px;border:1px solid;border-color:var(--dark) var(--light) var(--light) var(--dark);}
+
+  /* --- WINDOW --- */
+  .win{position:fixed;background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);display:flex;flex-direction:column;box-shadow:2px 2px 0 rgba(0,0,0,0.4);}
+  .win.resizable{overflow:hidden;min-width:400px;min-height:300px;}
+  .resize-handle{position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:se-resize;background:linear-gradient(135deg,transparent 35%,var(--dark) 35%,var(--dark) 50%,var(--light) 50%,var(--light) 60%,var(--darker) 60%,var(--darker) 75%,transparent 75%);z-index:5;}
+  .win.hidden{display:none!important;}
+  .titlebar{background:var(--blue);padding:2px 3px;display:flex;align-items:center;gap:4px;cursor:move;min-height:18px;}
+  .titlebar-text{color:#fff;font-weight:bold;font-size:11px;flex:1;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:5px;}
+  .titlebar-btns{display:flex;gap:2px;flex-shrink:0;}
+  .tbtn{width:16px;height:14px;background:var(--face);border:1px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;font-weight:bold;line-height:1;color:#000;}
+  .tbtn:active{border-color:var(--darker) var(--light) var(--light) var(--darker);}
+  .tbtn.close{margin-left:2px;}
+  .menubar{background:var(--face);padding:1px 0;display:flex;border-bottom:1px solid var(--dark);}
+  .mitem{padding:2px 8px;font-size:11px;cursor:pointer;}
+  .mitem:hover{background:var(--blue);color:#fff;}
+  .wbody{flex:1;overflow:auto;padding:6px;}
+
+  /* --- TABS --- */
+  .tabrow{display:flex;gap:2px;padding:4px 6px 0;background:var(--face);}
+  .tab{padding:2px 12px 3px;font-size:11px;cursor:pointer;background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--face) var(--light);position:relative;bottom:-2px;z-index:1;}
+  .tab.active{font-weight:bold;border-bottom-color:var(--face);z-index:3;padding-bottom:4px;}
+  .tabcontent{display:none;padding:6px;border-top:2px solid var(--dark);}
+  .tabcontent.active{display:block;}
+
+  /* --- BUTTONS --- */
+  .btn{padding:5px 18px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);min-width:80px;text-align:center;white-space:nowrap;}
+  .btn:active,.btn.pressed{border-color:var(--darker) var(--light) var(--light) var(--darker);padding:6px 17px 4px 19px;}
+  .btn.default{outline:1px solid #000;outline-offset:-2px;}
+  .btnx{padding:4px 10px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);}
+  .btnx:active{border-color:var(--darker) var(--light) var(--light) var(--darker);}
+
+  /* --- LISTVIEW --- */
+  .listview{background:#fff;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);overflow:auto;}
+  .listview table{width:100%;border-collapse:collapse;font-size:11px;}
+  .listview thead th{background:var(--face);padding:2px 5px;text-align:left;border-right:1px solid var(--dark);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);white-space:nowrap;font-weight:normal;cursor:pointer;}
+  .listview thead th:active{border-color:var(--darker) var(--light) var(--light) var(--darker);}
+  .listview tbody tr{cursor:pointer;}
+  .listview tbody tr:hover td{background:#e8e8e8;}
+  .listview tbody tr.sel td{background:var(--blue);color:#fff;}
+  .listview tbody td{padding:1px 5px;border-bottom:1px solid #ddd;white-space:nowrap;}
+
+  /* --- PLAYER --- */
+  .playerbar{background:var(--face);padding:4px 6px;border-top:2px solid var(--light);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .display{font-family:'VT323',monospace;font-size:15px;color:#00ff00;background:#000030;padding:3px 8px;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);flex:1;min-width:100px;white-space:nowrap;overflow:hidden;}
+  .eqdisplay{display:flex;align-items:flex-end;gap:2px;height:18px;}
+  .eqb{width:4px;background:#00ff00;min-height:2px;}
+  @keyframes eq1{0%,100%{height:3px}50%{height:16px}}
+  @keyframes eq2{0%,100%{height:10px}30%{height:3px}70%{height:18px}}
+  @keyframes eq3{0%,100%{height:14px}50%{height:5px}}
+  @keyframes eq4{0%,100%{height:6px}40%{height:14px}}
+  @keyframes eq5{0%,100%{height:12px}60%{height:3px}}
+  .playing .eqb:nth-child(1){animation:eq1 .55s infinite;}
+  .playing .eqb:nth-child(2){animation:eq2 .45s infinite;}
+  .playing .eqb:nth-child(3){animation:eq3 .65s infinite;}
+  .playing .eqb:nth-child(4){animation:eq4 .5s infinite;}
+  .playing .eqb:nth-child(5){animation:eq5 .6s infinite;}
+  .progress-wrap{width:100%;height:12px;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);background:#fff;cursor:pointer;margin:2px 0;}
+  .progress-fill{height:100%;background:var(--blue);width:0%;transition:width .3s linear;}
+
+  /* --- STATUS BAR --- */
+  .statusbar{display:flex;gap:2px;padding:1px 3px;margin-top:auto;}
+  .statpanel{padding:0px 5px;font-size:11px;border:1px solid;border-color:var(--dark) var(--light) var(--light) var(--dark);flex:1;line-height:16px;}
+
+  /* --- LICENSES --- */
+  .lic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .licbox{border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);background:var(--face);display:flex;flex-direction:column;}
+  .licbox-title{padding:2px 6px;font-weight:bold;font-size:11px;display:flex;align-items:center;gap:4px;color:#fff;}
+  .licbox-body{padding:8px;flex:1;display:flex;flex-direction:column;gap:4px;}
+  .lic-price{font-family:'VT323',monospace;font-size:38px;line-height:1;text-align:center;padding:4px 0;}
+  .licfeat{font-size:11px;display:flex;align-items:center;gap:4px;padding:1px 0;}
+  .licfeat::before{content:'✓';color:var(--blue);font-weight:bold;}
+  .licfeat.no{color:var(--dark);}
+  .licfeat.no::before{content:'✗';color:var(--dark);}
+
+  /* --- FORM --- */
+  .ftable{width:100%;border-spacing:3px 5px;}
+  .ftable td{font-size:11px;vertical-align:middle;}
+  .ftable td:first-child{white-space:nowrap;width:1px;}
+  .winput{width:100%;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);padding:2px 4px;font-size:11px;font-family:inherit;background:#fff;outline:none;}
+  .winput:focus{outline:1px dotted #000;outline-offset:-1px;}
+  .wselect{width:100%;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);padding:2px 4px;font-size:11px;font-family:inherit;background:#fff;outline:none;appearance:none;}
+  .wtextarea{width:100%;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);padding:4px;font-size:11px;font-family:inherit;background:#fff;outline:none;resize:vertical;}
+
+  /* --- GROUPBOX --- */
+  .gbox{border:1px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);padding:10px 8px 8px;margin:6px 0;position:relative;}
+  .gbox-lbl{position:absolute;top:-7px;left:8px;background:var(--face);padding:0 3px;font-size:11px;}
+
+  /* --- SEP --- */
+  .sep{height:2px;border-top:1px solid var(--darker);border-bottom:1px solid var(--light);margin:5px 0;}
+
+  /* --- MARQUEE (hidden) --- */
+  .marquee{display:none;}
+
+  /* --- DIALOGS --- */
+  .dlg-overlay{display:none;position:fixed;inset:0;z-index:600;align-items:center;justify-content:center;background:rgba(0,0,0,0.2);}
+  .dlg-overlay.open{display:flex;}
+  .dlg{background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);min-width:280px;box-shadow:3px 3px 0 rgba(0,0,0,0.4);}
+  .dlg-body{padding:14px;display:flex;gap:10px;align-items:flex-start;}
+  .dlg-icon{font-size:28px;flex-shrink:0;}
+  .dlg-text{font-size:11px;line-height:1.7;}
+  .dlg-btns{padding:6px;display:flex;justify-content:center;gap:6px;border-top:1px solid var(--dark);}
+
+  /* --- DESKTOP --- */
+  .desktop{padding:6px;display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding-bottom:32px;}
+  .dicon{display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px;width:68px;cursor:pointer;text-align:center;}
+  .dicon:hover .dicon-lbl,.dicon.sel .dicon-lbl{background:var(--blue);color:#fff;outline:1px dotted #fff;}
+  .dicon-img{font-size:26px;}
+  .dicon-lbl{font-size:11px;padding:1px 2px;color:#fff;text-shadow:1px 1px 1px #000;}
+
+  /* scrollbar */
+  ::-webkit-scrollbar{width:16px;height:16px;}
+  ::-webkit-scrollbar-track{background:var(--face);}
+  ::-webkit-scrollbar-thumb{background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);}
+  ::-webkit-scrollbar-button{background:var(--face);border:2px solid;border-color:var(--light) var(--darker) var(--darker) var(--light);display:block;height:16px;width:16px;}
+
+  @media(max-width:680px){
+    #win-main{width:calc(100vw - 8px)!important;left:4px!important;top:4px!important;height:calc(100vh - 36px)!important;}
+    .lic-grid{grid-template-columns:1fr;}
+    #win-cart,#win-contact{display:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="desktop">
+  <div class="dicon" ondblclick="showWin('win-main')"><div class="dicon-img">🎵</div><div class="dicon-lbl">Pete Los Beats</div></div>
+  <div class="dicon" ondblclick="showWin('win-cart')"><div class="dicon-img">🛒</div><div class="dicon-lbl">Cart</div></div>
+  <div class="dicon" ondblclick="showWin('win-contact')"><div class="dicon-img">✉️</div><div class="dicon-lbl">Contact</div></div>
+</div>
+
+<!-- ===== MAIN WINDOW ===== -->
+<div class="win resizable" id="win-main" style="top:16px;left:16px;width:860px;height:calc(100vh - 52px);max-width:calc(100vw - 32px);z-index:10;position:fixed;">
+  <div class="resize-handle" id="resize-handle-main"></div>
+  <div class="titlebar" id="tb-main">
+    <div class="titlebar-text">
+      <svg width="14" height="14" viewBox="0 0 14 14" style="flex-shrink:0"><rect x="0" y="2" width="14" height="10" fill="#c0c0c0" stroke="#000" stroke-width="0.5"/><rect x="1" y="3" width="12" height="8" fill="#000050"/><rect x="2" y="4" width="3" height="6" fill="#00cc00"/><rect x="6" y="3" width="3" height="7" fill="#00cc00"/><rect x="10" y="5" width="3" height="5" fill="#00cc00"/></svg>
+      Pete Los Beat Store
+    </div>
+    <div class="titlebar-btns">
+      <div class="tbtn" onclick="minWin('win-main')">_</div>
+      <div class="tbtn">□</div>
+      <div class="tbtn close" onclick="closeWin('win-main')">✕</div>
+    </div>
+  </div>
+  <div class="menubar">
+    <div class="mitem">File</div><div class="mitem">Edit</div><div class="mitem">View</div><div class="mitem">Favorites</div><div class="mitem">Help</div>
+  </div>
+  <div class="marquee"><span class="marquee-inner">⚡ NEW BEATS EVERY FRIDAY &nbsp;·&nbsp; FREE MP3 PREVIEW WITH EVERY LEASE &nbsp;·&nbsp; USE CODE PETELOS10 FOR 10% OFF YOUR FIRST ORDER &nbsp;·&nbsp; LIMITED EXCLUSIVE RIGHTS AVAILABLE &nbsp;·&nbsp; FOLLOW @peteloshiskeys &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+  <div class="tabrow">
+    <div class="tab active" onclick="setTab('beats')">🎵 Beat Store</div>
+    <div class="tab" onclick="setTab('licenses')">📄 Licenses</div>
+    <div class="tab" onclick="setTab('about')">ℹ️ About</div>
+  </div>
+
+  <!-- BEATS TAB -->
+  <div class="tabcontent active" id="tab-beats">
+    <div style="display:flex;gap:3px;margin-bottom:5px;align-items:center;flex-wrap:wrap;">
+      <button class="btnx" onclick="playSelected()">▶ Play</button>
+      <button class="btnx" onclick="stopPlay()">■ Stop</button>
+      <div class="tb-sep"></div>
+      <button class="btnx" onclick="addSelToCart()">🛒 Add to Cart</button>
+      <button class="btnx" onclick="showWin('win-cart')">View Cart (<span id="cart-count-small">0</span>)</button>
+      <div style="margin-left:auto;color:var(--dark);">1 beat available</div>
+    </div>
+    <div class="listview" style="height:210px;">
+      <table>
+        <thead><tr>
+          <th style="width:14px;"></th>
+          <th>#</th><th>Title</th><th>Genre</th><th>BPM</th><th>Key</th><th>Duration</th><th>From</th>
+        </tr></thead>
+        <tbody id="beat-tbody"></tbody>
+      </table>
+    </div>
+    <!-- PLAYER -->
+    <div class="playerbar">
+      <div style="display:flex;gap:2px;">
+        <button class="btnx">◀◀</button>
+        <button class="btnx" id="playbtn" onclick="togglePlay()">▶</button>
+        <button class="btnx" onclick="stopPlay()">■</button>
+        <button class="btnx">▶▶</button>
+      </div>
+      <div class="display" id="player-display">♪ SELECT A BEAT TO PLAY</div>
+      <div class="eqdisplay" id="eq" style="background:#000030;padding:2px 4px;border:2px solid;border-color:var(--darker) var(--light) var(--light) var(--darker);">
+        <div class="eqb" style="height:3px;"></div>
+        <div class="eqb" style="height:8px;"></div>
+        <div class="eqb" style="height:12px;"></div>
+        <div class="eqb" style="height:5px;"></div>
+        <div class="eqb" style="height:10px;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1px;align-items:center;">
+        <div style="font-size:9px;color:var(--dark);">VOL</div>
+        <input type="range" min="0" max="100" value="80" style="width:55px;height:12px;">
+      </div>
+    </div>
+    <div style="padding:0 6px 2px;">
+      <div class="progress-wrap" onclick="seekProg(event)"><div class="progress-fill" id="prog-fill"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dark);"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
+    </div>
+  </div>
+
+  <!-- LICENSES TAB -->
+  <div class="tabcontent" id="tab-licenses">
+    <div class="lic-grid">
+      <div class="licbox">
+        <div class="licbox-title" style="background:var(--blue);">📄 Basic Lease</div>
+        <div class="licbox-body">
+          <div class="lic-price" style="color:var(--blue);">$20</div>
+          <div class="sep"></div>
+          <div class="licfeat">MP3 file included</div>
+          <div class="licfeat">WAV file included</div>
+          <div class="licfeat no">Stems not included</div>
+          <div class="sep"></div>
+          <button class="btn" onclick="setTab('beats')">Select Beat</button>
+        </div>
+      </div>
+      <div class="licbox" style="border-color:#000 #000 #000 #000;border-width:2px;">
+        <div class="licbox-title" style="background:#800000;">⭐ Premium Lease — POPULAR</div>
+        <div class="licbox-body" style="background:#fffff8;">
+          <div class="lic-price" style="color:#800000;">$40</div>
+          <div class="sep"></div>
+          <div class="licfeat">MP3 file included</div>
+          <div class="licfeat">WAV file included</div>
+          <div class="licfeat">Stems included</div>
+          <div class="sep"></div>
+          <button class="btn default" onclick="setTab('beats')">Select Beat</button>
+        </div>
+      </div>
+      <div class="licbox">
+        <div class="licbox-title" style="background:#005000;">💎 Exclusive Rights</div>
+        <div class="licbox-body">
+          <div class="lic-price" style="color:#005000;font-size:22px;padding-top:8px;">Contact for price</div>
+          <div class="sep"></div>
+          <div class="licfeat">MP3 file included</div>
+          <div class="licfeat">WAV file included</div>
+          <div class="licfeat">Stems included</div>
+          <div class="licfeat">Full exclusive ownership</div>
+          <div class="licfeat">Beat removed from store</div>
+          <div class="sep"></div>
+          <button class="btn" onclick="showWin('win-contact')">Contact Us</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT TAB -->
+  <div class="tabcontent" id="tab-about">
+    <div class="gbox">
+      <div class="gbox-lbl">Pete Los Beat Store v1.0</div>
+      <table style="font-size:11px;width:100%;border-spacing:3px;">
+        <tr><td style="color:var(--dark);width:130px;">Producer:</td><td><b>Pete Los</b></td></tr>
+        <tr><td style="color:var(--dark);">Version:</td><td>1.0.0 (Build 1998)</td></tr>
+        <tr><td style="color:var(--dark);">Platform:</td><td>Windows 98 Second Edition</td></tr>
+        <tr><td style="color:var(--dark);">Beats Available:</td><td>8</td></tr>
+        <tr><td style="color:var(--dark);">Contact:</td><td><a href="mailto:prodpetelos@gmail.com" style="color:var(--blue);">prodpetelos@gmail.com</a></td></tr>
+        <tr><td style="color:var(--dark);">Instagram:</td><td><a href="https://instagram.com/peteloshiskeys" target="_blank" style="color:var(--blue);">@peteloshiskeys</a></td></tr>
+        <tr><td style="color:var(--dark);">YouTube:</td><td><a href="https://www.youtube.com/watch?v=8eqSBVoxg1c" target="_blank" style="color:var(--blue);">youtube.com/petelos</a></td></tr>
+      </table>
+    </div>
+
+    <div style="margin-top:8px;text-align:center;">
+      <button class="btn default" onclick="showDlg('dlg-about')">OK</button>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="statpanel" id="stat-msg">Ready</div>
+    <div class="statpanel" style="flex:0 0 auto;width:110px;" id="stat-cart">Cart: 0 items</div>
+    <div class="statpanel" style="flex:0 0 auto;width:70px;" id="stat-total">$0.00</div>
+  </div>
+</div>
+
+<!-- ===== CART WINDOW ===== -->
+<div class="win" id="win-cart" style="top:50px;right:16px;width:340px;z-index:20;">
+  <div class="titlebar" id="tb-cart">
+    <div class="titlebar-text">🛒 Shopping Cart</div>
+    <div class="titlebar-btns">
+      <div class="tbtn" onclick="minWin('win-cart')">_</div>
+      <div class="tbtn close" onclick="closeWin('win-cart')">✕</div>
+    </div>
+  </div>
+  <div class="wbody">
+    <div class="listview" style="min-height:70px;max-height:150px;">
+      <table>
+        <thead><tr><th>Beat</th><th>License</th><th>$</th><th></th></tr></thead>
+        <tbody id="cart-tbody"><tr><td colspan="4" style="padding:6px;color:var(--dark);font-style:italic;">Cart is empty</td></tr></tbody>
+      </table>
+    </div>
+    <div class="sep"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px;">
+      <b>Total:</b>
+      <span style="font-family:'VT323',monospace;font-size:28px;color:var(--blue);" id="cart-total">$0</span>
+    </div>
+    <div class="sep"></div>
+    <div style="display:flex;gap:4px;justify-content:flex-end;">
+      <button class="btn" onclick="clearCart()">Clear All</button>
+      <button class="btn default" onclick="checkout()">Checkout →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONTACT WINDOW ===== -->
+<div class="win hidden" id="win-contact" style="top:80px;left:220px;width:400px;z-index:30;">
+  <div class="titlebar" id="tb-contact">
+    <div class="titlebar-text">✉️ New Message — Pete Los Beat Store</div>
+    <div class="titlebar-btns">
+      <div class="tbtn" onclick="minWin('win-contact')">_</div>
+      <div class="tbtn close" onclick="closeWin('win-contact')">✕</div>
+    </div>
+  </div>
+  <div class="wbody">
+    <form onsubmit="sendContact(event)">
+      <table class="ftable">
+        <tr><td><b>From:</b></td><td><input class="winput" type="text" placeholder="Your name" required></td></tr>
+        <tr><td><b>E-mail:</b></td><td><input class="winput" type="email" placeholder="your@email.com" required></td></tr>
+        <tr><td><b>Subject:</b></td><td>
+          <select class="wselect">
+            <option>-- Select a subject --</option>
+            <option>Custom beat request</option>
+            <option>Exclusive licensing inquiry</option>
+            <option>Sync / TV / Film licensing</option>
+            <option>General inquiry</option>
+          </select>
+        </td></tr>
+        <tr><td colspan="2"><div class="sep"></div></td></tr>
+        <tr><td colspan="2"><textarea class="wtextarea" rows="5" placeholder="Type your message here..."></textarea></td></tr>
+      </table>
+      <div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px;">
+        <button class="btn" type="button" onclick="closeWin('win-contact')">Cancel</button>
+        <button class="btn default" type="submit">📤 Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DIALOGS -->
+<div class="dlg-overlay" id="dlg-about">
+  <div class="dlg">
+    <div class="titlebar"><div class="titlebar-text">About Pete Los Beat Store</div><div class="titlebar-btns"><div class="tbtn close" onclick="closeDlg('dlg-about')">✕</div></div></div>
+    <div class="dlg-body"><div class="dlg-icon">ℹ️</div><div class="dlg-text"><b>Pete Los Beat Store</b><br>Version 1.0.0 (Build 1998)<br><br>This program is licensed for personal use only.<br>All beats © Pete Los. All rights reserved.<br><br>Unauthorized distribution is prohibited.</div></div>
+    <div class="dlg-btns"><button class="btn default" onclick="closeDlg('dlg-about')">OK</button></div>
+  </div>
+</div>
+
+<div class="dlg-overlay" id="dlg-added">
+  <div class="dlg">
+    <div class="titlebar"><div class="titlebar-text">Added to Cart</div><div class="titlebar-btns"><div class="tbtn close" onclick="closeDlg('dlg-added')">✕</div></div></div>
+    <div class="dlg-body"><div class="dlg-icon">🛒</div><div class="dlg-text" id="dlg-added-txt">Beat added!</div></div>
+    <div class="dlg-btns">
+      <button class="btn" onclick="closeDlg('dlg-added');showWin('win-cart')">View Cart</button>
+      <button class="btn default" onclick="closeDlg('dlg-added')">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<div class="dlg-overlay" id="dlg-contact-ok">
+  <div class="dlg">
+    <div class="titlebar"><div class="titlebar-text">Message Sent</div><div class="titlebar-btns"><div class="tbtn close" onclick="closeDlg('dlg-contact-ok')">✕</div></div></div>
+    <div class="dlg-body"><div class="dlg-icon">✅</div><div class="dlg-text">Your message has been sent!<br><br>Pete Los will respond within 24 hours.<br>Thank you for reaching out.</div></div>
+    <div class="dlg-btns"><button class="btn default" onclick="closeDlg('dlg-contact-ok')">OK</button></div>
+  </div>
+</div>
+
+<div class="dlg-overlay" id="dlg-checkout">
+  <div class="dlg">
+    <div class="titlebar"><div class="titlebar-text">Checkout</div><div class="titlebar-btns"><div class="tbtn close" onclick="closeDlg('dlg-checkout')">✕</div></div></div>
+    <div class="dlg-body"><div class="dlg-icon">💳</div><div class="dlg-text" id="dlg-checkout-txt">Processing...</div></div>
+    <div class="dlg-btns"><button class="btn default" onclick="closeDlg('dlg-checkout')">OK</button></div>
+  </div>
+</div>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+  <button class="start-btn"><div class="win-logo"><div></div><div></div><div></div><div></div></div>Start</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn active" id="tbb-main" onclick="focusWin('win-main')">🎵 Pete Los Beat Store</button>
+  <button class="tb-btn" id="tbb-cart" onclick="focusWin('win-cart')">🛒 Cart</button>
+  <button class="tb-btn" id="tbb-contact" onclick="focusWin('win-contact')">✉️ Contact</button>
+  <div class="tb-clock" id="clock">12:00 PM</div>
+</div>
+
+// ---- RENDER ----
+function renderBeats(){
+  document.getElementById('beat-tbody').innerHTML=BEATS.map((b,i)=>`
+    <tr id="brow-${b.id}" onclick="selBeat(${b.id})" ondblclick="selBeat(${b.id});togglePlay()">
+      <td><span id="pind-${b.id}" style="visibility:hidden;color:var(--blue);">▶</span></td>
+      <td>${String(i+1).padStart(2,'0')}</td>
+      <td>${b.title}</td>
+      <td>${b.genre}</td>
+      <td>${b.bpm}</td>
+      <td>${b.key}</td>
+      <td>${b.dur}</td>
+      <td>$29+</td>
+    </tr>`).join('');
+}
+
+function selBeat(id){
+  selId=id;
+  document.querySelectorAll('#beat-tbody tr').forEach(r=>r.classList.remove('sel'));
+  document.getElementById('brow-'+id)?.classList.add('sel');
+  const b=BEATS.find(x=>x.id===id);
+  setStatus(`${b.title} — ${b.genre} — ${b.bpm} BPM — ${b.key}`);
+}
+
+// ---- PLAYBACK ----
+function togglePlay(){
+  if(!selId)selBeat(1);
+  playing?stopPlay():playSelected();
+}
+let audioEl=null;
+function playSelected(){
+  if(!selId)selBeat(1);
+  const b=BEATS.find(x=>x.id===selId);
+  if(!b)return;
+  if(playId&&playId!==selId){
+    document.getElementById('pind-'+playId).style.visibility='hidden';
+    if(audioEl){audioEl.pause();audioEl.currentTime=0;}
+  }
+  playId=selId;playing=true;
+  document.getElementById('pind-'+b.id).style.visibility='visible';
+  document.getElementById('playbtn').textContent='■';
+  document.getElementById('player-display').textContent='♪ '+b.title+'  '+b.bpm+' BPM';
+  document.getElementById('eq').classList.add('playing');
+  if(b.audio){
+    if(!audioEl||audioEl.dataset.id!=b.id){
+      if(audioEl)audioEl.pause();
+      audioEl=new Audio(b.audio);
+      audioEl.dataset.id=b.id;
+      audioEl.addEventListener('timeupdate',()=>{
+        const cur=audioEl.currentTime,dur=audioEl.duration||1;
+        document.getElementById('prog-fill').style.width=(cur/dur*100)+'%';
+        const m=Math.floor(cur/60),s=Math.floor(cur%60);
+        document.getElementById('t-cur').textContent=m+':'+String(s).padStart(2,'0');
+        const dm=Math.floor(dur/60),ds=Math.floor(dur%60);
+        document.getElementById('t-tot').textContent=dm+':'+String(ds).padStart(2,'0');
+      });
+      audioEl.addEventListener('ended',()=>stopPlay());
+    }
+    audioEl.play();
+  } else {
+    if(pTimer)clearInterval(pTimer);
+    pTimer=setInterval(()=>{prog++;if(prog>=b.secs)prog=0;updProg(b);},1000);
+    updProg(b);
+  }
+}
+function stopPlay(){
+  playing=false;clearInterval(pTimer);
+  if(audioEl){audioEl.pause();}
+  document.getElementById('playbtn').textContent='▶';
+  document.getElementById('eq').classList.remove('playing');
+  if(playId)document.getElementById('pind-'+playId).style.visibility='hidden';
+  document.getElementById('player-display').textContent='■ STOPPED';
+  prog=0;document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('t-cur').textContent='0:00';
+}
+function updProg(b){
+  document.getElementById('prog-fill').style.width=(prog/b.secs*100)+'%';
+  document.getElementById('t-cur').textContent=Math.floor(prog/60)+':'+String(prog%60).padStart(2,'0');
+}
+function seekProg(e){
+  if(!playId)return;
+  const b=BEATS.find(x=>x.id===playId);
+  if(audioEl&&audioEl.dataset.id==b.id){
+    audioEl.currentTime=(e.offsetX/e.currentTarget.offsetWidth)*audioEl.duration;
+  } else {
+    prog=Math.floor(e.offsetX/e.currentTarget.offsetWidth*b.secs);
+    updProg(b);
+  }
+}
+
+// ---- TABS ----
+function setTab(name){
+  const names=['beats','licenses','about'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.tabcontent').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ---- CART ----
+function addSelToCart(){
+  if(!selId){setStatus('Please select a beat first.');return;}
+  addToCart(selId);
+}
+function addToCart(id){
+  const b=BEATS.find(x=>x.id===id);
+  if(cart.find(i=>i.id===id)){
+    document.getElementById('dlg-added-txt').innerHTML=`<b>${b.title}</b> is already in your cart.`;
+    showDlg('dlg-added');return;
+  }
+  cart.push({id,title:b.title,lic:'Basic',price:20});
+  updateCart();
+  document.getElementById('dlg-added-txt').innerHTML=`<b>${b.title}</b> added to cart!<br><br>License: Basic Lease ($20)<br>You can change the license in the cart.`;
+  showDlg('dlg-added');
+}
+function removeFromCart(id){cart=cart.filter(i=>i.id!==id);updateCart();}
+function changeLic(id,lic){const item=cart.find(i=>i.id===id);if(item){item.lic=lic;item.price=LICS[lic];}updateCart();}
+function clearCart(){cart=[];updateCart();}
+function updateCart(){
+  const total=cart.reduce((s,i)=>s+i.price,0);
+  document.getElementById('cart-total').textContent='$'+total;
+  document.getElementById('stat-cart').textContent='Cart: '+cart.length+' item'+(cart.length!==1?'s':'');
+  document.getElementById('stat-total').textContent='$'+total+'.00';
+  document.getElementById('cart-count-small').textContent=cart.length;
+  const tb=document.getElementById('cart-tbody');
+  if(!cart.length){tb.innerHTML='<tr><td colspan="4" style="padding:6px;color:var(--dark);font-style:italic;">Cart is empty</td></tr>';return;}
+  tb.innerHTML=cart.map(item=>`
+    <tr>
+      <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;">${item.title}</td>
+      <td><select class="wselect" style="width:86px;" onchange="changeLic(${item.id},this.value)">
+        ${Object.entries(LICS).map(([l,p])=>`<option value="${l}"${item.lic===l?' selected':''}>$${p} ${l}</option>`).join('')}
+      </select></td>
+      <td>$${item.price}</td>
+      <td><button class="btnx" onclick="removeFromCart(${item.id})">✕</button></td>
+    </tr>`).join('');
+}
+function checkout(){
+  if(!cart.length){document.getElementById('dlg-checkout-txt').textContent='Your cart is empty. Add some beats first!';showDlg('dlg-checkout');return;}
+  const total=cart.reduce((s,i)=>s+i.price,0);
+  document.getElementById('dlg-checkout-txt').innerHTML='<b>Order Summary</b><br><br>'+cart.map(i=>`${i.title} — ${i.lic} — $${i.price}`).join('<br>')+'<br><br><b>Total: $'+total+'</b><br><br>Redirecting to secure payment gateway...';
+  showDlg('dlg-checkout');
+}
+
+// ---- CONTACT ----
+function sendContact(e){e.preventDefault();closeWin('win-contact');showDlg('dlg-contact-ok');}
+
+// ---- WINDOW MGMT ----
+function focusWin(id){
+  const w=document.getElementById(id);if(!w)return;
+  if(w.classList.contains('hidden')){showWin(id);return;}
+  zTop++;w.style.zIndex=zTop;
+  document.querySelectorAll('.win .titlebar').forEach(tb=>tb.style.background=tb.closest('.win').id===id?'var(--blue)':'var(--dark)');
+  document.querySelectorAll('.tb-btn').forEach(b=>b.classList.remove('active'));
+  const map={' win-main':'tbb-main','win-cart':'tbb-cart','win-contact':'tbb-contact'};
+  if(map[id])document.getElementById(map[id])?.classList.add('active');
+}
+function showWin(id){document.getElementById(id)?.classList.remove('hidden');focusWin(id);}
+function closeWin(id){document.getElementById(id)?.classList.add('hidden');}
+function minWin(id){document.getElementById(id)?.classList.add('hidden');}
+
+// Draggable
+function makeDrag(winId,barId){
+  const w=document.getElementById(winId),b=document.getElementById(barId);
+  if(!w||!b)return;
+  b.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('tbtn'))return;
+    focusWin(winId);
+    const ox=e.clientX,oy=e.clientY,rect=w.getBoundingClientRect(),sl=rect.left,st=rect.top;
+    function mm(e){w.style.left=(sl+e.clientX-ox)+'px';w.style.top=(st+e.clientY-oy)+'px';w.style.right='auto';}
+    function mu(){document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);}
+    document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu);
+  });
+}
+makeDrag('win-main','tb-main');makeDrag('win-cart','tb-cart');makeDrag('win-contact','tb-contact');
+
+// Dialogs
+function showDlg(id){document.getElementById(id).classList.add('open');}
+function closeDlg(id){document.getElementById(id).classList.remove('open');}
+
+// Status
+function setStatus(msg){document.getElementById('stat-msg').textContent=msg;}
+
+// Clock
+function tick(){const n=new Date();let h=n.getHours(),m=n.getMinutes();const a=h>=12?'PM':'AM';h=h%12||12;document.getElementById('clock').textContent=h+':'+String(m).padStart(2,'0')+' '+a;}
+tick();setInterval(tick,10000);
+
+// Resize main window
+(function(){
+  const handle=document.getElementById('resize-handle-main');
+  const win=document.getElementById('win-main');
+  if(!handle||!win)return;
+  handle.addEventListener('mousedown',function(e){
+    e.preventDefault();e.stopPropagation();
+    const startX=e.clientX,startY=e.clientY;
+    const startW=win.offsetWidth,startH=win.offsetHeight;
+    function onMove(e){
+      const nw=Math.max(400,startW+(e.clientX-startX));
+      const nh=Math.max(300,startH+(e.clientY-startY));
+      win.style.width=nw+'px';win.style.height=nh+'px';
+    }
+    function onUp(){document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
+    document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
+  });
+})();
+
+
+// Init
+renderBeats();selBeat(1);
+</script>
+</body>
+</html>
